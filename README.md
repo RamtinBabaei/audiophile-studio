@@ -1,112 +1,130 @@
 # Audiophile Studio
 
-**Live demo:** [Open Audiophile Studio](https://audiophile-studio.ramtinbabaei-portfolio.workers.dev/)
+A modern audio storefront with server-rendered product pages, a persistent shopping cart, and database-backed checkout.
 
-A complete implementation of the [Frontend Mentor Audiophile challenge](https://www.frontendmentor.io/challenges/audiophile-ecommerce-website-C8cuSd_wx), built with React, TypeScript, Tailwind CSS, server-rendered routes, and a durable checkout API.
+[![CI and deployment](https://github.com/RamtinBabaei/audiophile-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/RamtinBabaei/audiophile-studio/actions/workflows/ci.yml)
 
-This integrated source package includes the complete application and the GitHub Actions deployment workflow. Persian first-run instructions are in [START_HERE_FA.md](START_HERE_FA.md); publication instructions are in [docs/GITHUB_ACTIONS_FA.md](docs/GITHUB_ACTIONS_FA.md).
+[Live website](https://audiophile-studio.ramtinbabaei-portfolio.workers.dev/) · [Architecture](docs/ARCHITECTURE.md) · [API reference](docs/API.md)
 
-**Portfolio demonstration:** orders are actually validated and persisted, but payments, deliveries, and email notifications are not performed. Use fictional customer information. This is not a live retail business.
+Built with React, TypeScript, and Tailwind CSS. The storefront and API run together on Cloudflare Workers, with orders stored in Cloudflare D1 and deployments automated through GitHub Actions.
 
-## Run in VS Code
+> **Demo checkout:** orders are validated and saved, but no payments are collected, products shipped, or emails sent. Use fictional customer details.
 
-Prerequisites: Node.js **22.13 or newer**, Git, and pnpm **11.25.0**. No MongoDB binary, Docker container, cloud account, or API key is needed locally.
+## Features
 
-1. Extract `Audiophile_Studio_Complete.zip`.
-2. Open the `audiophile-studio` folder in VS Code (the folder containing `package.json`).
-3. Select **Terminal → New Terminal** and run:
+- **Product discovery:** dedicated headphone, speaker, and earphone collections, six product detail pages, image galleries, specifications, and related products.
+- **Persistent cart:** quantity controls, individual removal, empty states, cross-tab synchronization, and recovery after page reloads.
+- **Validated checkout:** shared client/server validation, two demo payment methods, and server-calculated totals using integer cents.
+- **Durable orders:** D1 persistence, idempotent submissions, and retry handling that preserves the cart when a request fails.
+- **Responsive experience:** layouts for mobile, tablet, and desktop, with transitions, hover feedback, and reduced-motion support.
+- **Accessible interactions:** keyboard navigation, labeled inputs, focus management, and dialog-based cart and order confirmation.
+- **Optimized assets:** responsive WebP imagery, a self-hosted Manrope font, lazy loading, and route-based code splitting.
+
+## Technology
+
+| Area       | Implementation                                         |
+| ---------- | ------------------------------------------------------ |
+| Interface  | React 19, TypeScript, Tailwind CSS 4                   |
+| Rendering  | Next.js App Router conventions through Vinext and Vite |
+| API        | TypeScript Web Request/Response handlers               |
+| Validation | Zod                                                    |
+| Cart state | `useSyncExternalStore` and versioned localStorage      |
+| Database   | Cloudflare D1 with Drizzle ORM                         |
+| Testing    | Vitest, Testing Library, Playwright                    |
+| Hosting    | Cloudflare Workers                                     |
+| Delivery   | GitHub Actions                                         |
+
+Vinext is a beta compatibility layer. The build uses Vinext/Vite and targets Cloudflare Workers. See the [architecture notes](docs/ARCHITECTURE.md) for runtime choices and tradeoffs.
+
+## Project structure
+
+```text
+app/                 Pages, layouts, loading states, and API routes
+components/store/    Storefront, cart, and checkout components
+lib/shop/            Catalog, pricing, validation, and order logic
+db/                  Database schema and D1 adapter
+drizzle/             SQL migrations
+worker/              Cloudflare Worker entrypoint
+public/              Images, fonts, and icons
+tests/               Unit, component, service, and browser tests
+scripts/             Development, build, migration, and deployment helpers
+docs/                Setup, architecture, API, and testing documentation
+.github/workflows/   Continuous integration and deployment
+```
+
+## Run locally
+
+**Requirements:** Node.js 22.13 or newer and pnpm 11.25.0.
 
 ```sh
+git clone https://github.com/RamtinBabaei/audiophile-studio.git
+cd audiophile-studio
 npm install --global pnpm@11.25.0
 pnpm install --frozen-lockfile
 pnpm db:migrate:local
 pnpm dev
 ```
 
-4. Open **http://localhost:5173**. If that port is occupied, use the exact URL printed in the terminal.
-5. Visit **http://localhost:5173/api/health**. It should return `{"status":"ok","database":"connected","mode":"demo"}`.
-6. Open a product, add it to the cart, reload, and confirm the cart is still there. Checkout using fictional contact details and e-Money number `123456789`, PIN `1234`, or select cash on delivery. The confirmation proves that a database write succeeded.
+Open the URL printed in the terminal, normally `http://localhost:5173`.
 
-The database lives in `.wrangler/state/`; restarting the app preserves orders. Do not commit that directory. `pnpm db:migrate:local` is safe to repeat; Wrangler tracks applied migrations.
+Local development uses an emulated D1 database and requires no cloud credentials. Database state persists in `.wrangler/state/`. Migrations can be run again safely.
 
-Persian walkthrough: [docs/LOCAL_SETUP_FA.md](docs/LOCAL_SETUP_FA.md).
+For a checkout walkthrough, add a product to the cart and use fictional contact details. Choose cash on delivery, or use the demo e-Money number `123456789` and PIN `1234`.
 
-## What works
+Persian setup guides: [first run](START_HERE_FA.md) · [local troubleshooting](docs/LOCAL_SETUP_FA.md).
 
-- Homepage, headphones/speakers/earphones categories, all six product pages, galleries, box contents, related products, and 404/error states.
-- Persistent device-local cart, cross-tab synchronization, quantity controls, individual removal, remove-all, empty state, and reload recovery.
-- Accessible dialog-based cart/navigation/confirmation, keyboard focus restoration, labeled fields, validation messages, focus on first invalid field, and reduced-motion support.
-- Both checkout payment-method flows, client and server Zod validation, authoritative integer-cent totals, fixed $50 shipping, and the challenge's 20% included-VAT display.
-- Real D1 order persistence, idempotent submission, timeout/retry handling, and user-visible failures without discarding the cart.
-- Art-directed WebP images, local subsetted Manrope font, eager hero loading, lazy secondary imagery, and route-based code splitting.
+## Quality checks
 
-## Architecture
+| Command             | Purpose                            |
+| ------------------- | ---------------------------------- |
+| `pnpm typecheck`    | TypeScript validation              |
+| `pnpm lint`         | ESLint checks                      |
+| `pnpm format:check` | Formatting verification            |
+| `pnpm test`         | Unit, component, and service tests |
+| `pnpm build`        | Production Worker build            |
+| `pnpm start`        | Serve the production build locally |
+| `pnpm test:e2e`     | Playwright browser journeys        |
 
-| Layer                 | Choice                                             | Reason                                                                      |
-| --------------------- | -------------------------------------------------- | --------------------------------------------------------------------------- |
-| UI                    | React 19 + TypeScript + Tailwind CSS 4             | Typed reusable components and reference-specific responsive styles          |
-| Routing and rendering | Next.js App Router conventions through Vinext/Vite | Server-rendered content and separately loaded interactive checkout/cart     |
-| API                   | TypeScript Web Request/Response handlers           | Same-origin API without an unnecessary separate Express process             |
-| Validation            | Zod                                                | Shared structural rules; server always validates independently              |
-| Cart                  | `useSyncExternalStore` + versioned localStorage    | Small state surface; no global-state dependency required                    |
-| Persistence           | Cloudflare D1 (SQLite) + Drizzle                   | Durable hosted orders and identical local database emulation                |
-| Tests                 | Vitest + Testing Library + Playwright specs        | Business logic, components, API boundaries, and repeatable browser journeys |
-| Hosting               | Cloudflare Worker via Sites                        | The UI, API, and database run together                                      |
-
-Vinext is a beta compatibility layer, not `next build`. The supported target for this package is Cloudflare Workers. Do not deploy it to Vercel or GitHub Pages without a deliberate runtime/database migration. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for tradeoffs.
-
-```text
-app/                 Server pages, route-level loading/errors, API handlers
-components/store/    Shared storefront, cart, product and checkout components
-lib/shop/            Catalog, pricing, validation, storage and order service
-worker/              Worker entrypoint
-db/                  Drizzle schema and D1 adapter
-drizzle/             Generated SQL migrations and snapshots
- tests/               Unit, component, HTTP/service and browser tests
- scripts/             Portable build/dev/database helpers
- docs/                Setup, deployment, testing and architecture notes
- public/              Self-hosted images, font and icons
-```
-
-## Commands
-
-```sh
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm format:check
-pnpm build
-pnpm start
-```
-
-`pnpm start` serves the production Worker locally, normally at **http://127.0.0.1:8787**; use the printed URL. It does not deploy. Build before starting it. Local dev and the built Worker share database state.
-
-Browser specs can be run in a separate terminal while `pnpm dev` runs:
+To run browser tests, start the app in one terminal, then run the following in another:
 
 ```sh
 pnpm exec playwright install chromium webkit
 pnpm test:e2e
 ```
 
-`PLAYWRIGHT_BASE_URL` can target another local port. The mobile project uses an iPhone viewport/WebKit preset. Browser packages are only needed for this optional suite, not to run the store. The precise executed checks and verification limits are recorded in [docs/TESTING_REPORT.md](docs/TESTING_REPORT.md).
+Set `PLAYWRIGHT_BASE_URL` when using a different local address. Production preview requires `pnpm build` before `pnpm start`; it normally runs at `http://127.0.0.1:8787`.
+
+Browser coverage includes product browsing, cart persistence, checkout validation, order confirmation, and responsive layouts. See the [testing report](docs/TESTING_REPORT.md) for verification details.
 
 ## API
 
-| Endpoint            | Behavior                                                       |
-| ------------------- | -------------------------------------------------------------- |
-| `GET /api/products` | All six public catalog products, cached for five minutes       |
-| `POST /api/quote`   | Validated cart array → authoritative quote in cents            |
-| `POST /api/orders`  | Checkout payload + UUID `Idempotency-Key` → saved demo receipt |
-| `GET /api/health`   | Runs a database query and reports service availability         |
+| Endpoint            | Purpose                                     |
+| ------------------- | ------------------------------------------- |
+| `GET /api/products` | Return the public product catalog           |
+| `POST /api/quote`   | Validate cart items and calculate totals    |
+| `POST /api/orders`  | Validate and persist a demo order           |
+| `GET /api/health`   | Check application and database availability |
 
-No public endpoint lists customer details or retrieves orders. e-Money number/PIN are validated and discarded. They never appear in the database or the returned receipt. See [docs/API.md](docs/API.md).
+Order submissions use a UUID `Idempotency-Key` to prevent duplicate orders during retries. Pricing is calculated on the server. Demo e-Money credentials are validated and discarded; they are not stored in the database.
 
-## Deployment and GitHub
+See the [API documentation](docs/API.md) for request and response formats.
 
-Follow [docs/GITHUB_ACTIONS_FA.md](docs/GITHUB_ACTIONS_FA.md) to publish from your personal GitHub account through GitHub Actions to your own Cloudflare Workers account. `.github/workflows/ci.yml` checks types, lint, formatting, unit tests, deployment configuration, the production build, and browser journeys before publishing. Set the documented repository secrets and variables to enable deployment; pull requests run checks only. [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) retains the manual deployment and operations reference.
+## Deployment
 
-Before a real commercial launch, connect a payment provider through verified webhooks, add fulfillment/inventory, deploy abuse controls, establish privacy/retention policies, verify tax rules for your jurisdiction, and complete independent security and accessibility reviews. The challenge's VAT presentation is a design requirement, not a tax engine.
+Pushes to `main` trigger the GitHub Actions workflow:
 
-## Attribution and licensing
+1. Install dependencies and check types, lint, and formatting.
+2. Run unit tests and deployment configuration checks.
+3. Build the production Worker and run browser journeys against it.
+4. Apply production database migrations and deploy to Cloudflare.
+5. Verify the live database connection and publish the website link in the workflow summary.
 
-Original application code is MIT licensed. The Audiophile name, design, product copy, and challenge images are credited to Frontend Mentor and retain their original terms; the MIT license does not grant rights to those assets. Public challenge assets/product content were sourced from the public `ronnieima/audiophile-ecommerce` repository; no Figma/Sketch files are included. Obtain your own Frontend Mentor entitlement before redistributing restricted challenge assets. Manrope is under the SIL Open Font License in `public/fonts/OFL.txt`; icons use Lucide's ISC license. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Pull requests run verification without deploying. Publishing requires the repository secrets and variables described in the [deployment guide](docs/GITHUB_ACTIONS_FA.md).
+
+[View workflow runs](https://github.com/RamtinBabaei/audiophile-studio/actions/workflows/ci.yml) · [Deployment and operations](docs/DEPLOYMENT.md)
+
+## License
+
+Application code is available under the [MIT License](LICENSE). Third-party design, imagery, fonts, and icon credits are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md); their original licenses and terms apply.
+
+Maintained by [Ramtin Babaei](https://github.com/RamtinBabaei).
