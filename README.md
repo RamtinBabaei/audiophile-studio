@@ -1,3 +1,5 @@
+![Audiophile Studio project cover](docs/cover.svg)
+
 # Audiophile Studio
 
 A modern audio storefront with server-rendered product pages, a persistent shopping cart, and database-backed checkout.
@@ -9,6 +11,13 @@ A modern audio storefront with server-rendered product pages, a persistent shopp
 Built with React, TypeScript, and Tailwind CSS. The storefront and API run together on Cloudflare Workers, with orders stored in Cloudflare D1 and deployments automated through GitHub Actions.
 
 > **Demo checkout:** orders are validated and saved, but no payments are collected, products shipped, or emails sent. Use fictional customer details.
+
+## Engineering highlights
+
+- A typed cart store synchronizes browser tabs and recovers validated state after reloads.
+- Shared schemas connect form validation with the order API contract.
+- An order service separates checkout rules from the D1 repository through a small repository interface.
+- Idempotency keys and request fingerprints handle retries without silently creating duplicate orders.
 
 ## Features
 
