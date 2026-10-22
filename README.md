@@ -1,5 +1,7 @@
 # Audiophile Studio
 
+**Live demo:** [Open Audiophile Studio](https://audiophile-studio.ramtinbabaei-portfolio.workers.dev/)
+
 A complete implementation of the [Frontend Mentor Audiophile challenge](https://www.frontendmentor.io/challenges/audiophile-ecommerce-website-C8cuSd_wx), built with React, TypeScript, Tailwind CSS, server-rendered routes, and a durable checkout API.
 
 This integrated source package includes the complete application and the GitHub Actions deployment workflow. Persian first-run instructions are in [START_HERE_FA.md](START_HERE_FA.md); publication instructions are in [docs/GITHUB_ACTIONS_FA.md](docs/GITHUB_ACTIONS_FA.md).
